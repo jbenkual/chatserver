@@ -2,6 +2,16 @@ Telnet chat server by Joseph Benkual June 2015
 
 This server uses nodejs
 
+Here is a guide on installing node (and git):
+http://iconof.com/blog/how-to-install-setup-node-js-on-amazon-aws-ec2-complete-guide/
+
+Once installed, 
+git clone https://github.com/jbenkual/chatserver.git
+
+cd chatserver
+
+node server
+
 To access the server you can use the telnet command and pass in the ip address and port of the host server.
 
 Example: Telnet 127.0.0.1 8888
