@@ -1,6 +1,8 @@
-function User (name) {
+function User (name, socket) {
 	this.name = name;
-	this.password = password;
+	this.socket = socket;
+	this.mode = 'username';
+	this.room = '';
 }
 
 module.exports = User;

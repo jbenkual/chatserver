@@ -1,0 +1,8 @@
+{
+	"db_host":"jbenkual1.cf9gawwfqphe.us-west-2.rds.amazonaws.com",
+	"db_user":"chatserver",
+	"db_pass":"a9b8c7d6e5",
+	"max_rooms":"100",
+	"max_users":"100",
+	"port":"8888"
+}

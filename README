@@ -9,12 +9,18 @@ Example: Telnet 127.0.0.1 8888
 You can change which port used in the config file, as well as the database info and other settings
 
 Here is a list of commands the client can use.
-quit - disconnects from server
-/register - creates a new account
-/join - enters a chatroom (by default this also creates a new room if necessary)
+/quit - disconnects from server
+/join - enters an existing room
 /leave - exits a chatroom
-/create - creates a chatroom
+/create roomName password - creates a chatroom where you are the owner
 
+ToDo:
+/register username email password - creates a new account
+/promote username - creates a moderator for the current chatroom (owners only)
+/demote username - removes moderator privelages (owners only)
+/kick - removes a user from a room (moderators only)
+/ban days - prevents a user from entering a room for # of days (moderators only)
+/globalban days - prevents a user from logging in for # of days (admin only)
 
 Sources used:
 http://www.davidmclifton.com/2011/07/22/simple-telnet-server-in-node-js/
