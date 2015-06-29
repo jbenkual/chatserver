@@ -1,0 +1,11 @@
+
+Telnet chat server by Joseph Benkual June 2015
+
+Sources used:
+http://www.davidmclifton.com/2011/07/22/simple-telnet-server-in-node-js/
+
+https://nodejs.org/api/crypto.html#crypto_crypto_pbkdf2_password_salt_iterations_keylen_digest_callback
+
+https://github.com/felixge/node-mysql/
+
+
