@@ -94,7 +94,6 @@ function parseData(socket, data, user) {
       result = "Format: /register name email password\n";
     }*/
   }
-  }
   else if(data == '/leave') {
     user.room = '';
     user.mode = 'join';
