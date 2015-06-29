@@ -6,13 +6,13 @@ var config  = require('./config.json');
 var User    = require('./user.js');
 var Room    = require('./room.js');
 
-var connection = mysql.createConnection({
+/*var connection = mysql.createConnection({
   host     : config.db_host,
   user     : config.db_user,
   password : config.db_pass
-});
+});*/
 
-connection.connect();
+//connection.connect();
  
 var sockets = []; // list of unique client connections in use
 var rooms = []; // list of rooms
@@ -40,7 +40,7 @@ function receiveData(socket, data, user) {
   }
   var result = parseData(socket, data, user);
   if(result != "") {
-    socks.write(result);
+    socket.write(result);
   }
 }
 
@@ -50,6 +50,9 @@ function receiveData(socket, data, user) {
 function parseData(socket, data, user) {
   var result = "";
 
+  data = data+'';
+  var splitData = data.split(" ");
+
   if(user.mode === 'username') {
     if(data in users) {
       result = "Sorry, that name is already in use";
@@ -58,23 +61,22 @@ function parseData(socket, data, user) {
       user.name = data;
       users[data] = user;
       user.mode = 'join';
+      user.socket = socket;
       getRoomNames(socket);
     }
   }
-  else if(data == '/join') {
-    var roomName = data.split(" ");
-    if(roomName.length > 1) {
-      joinRoom(user, roomName[1]);
+  else if(splitData[0] == '/join') {
+    if(splitData.length > 1) {
+      joinRoom(user, splitData[1]);
     }
     else {
       result = "Please specify a room to join\n";
     }
   }
-  else if(data == '/list') {
+  else if(splitData[0] == '/list') {
     getRoomNames(socket);
   }
-  else if(data == '/register') {
-    var splitData = data.split(" ");
+  else if(splitData[0]  == '/register') {
     if(splitData.length > 3) {
       createUser(splitData[1], splitData[2], splitData[3]);
     }
@@ -82,19 +84,23 @@ function parseData(socket, data, user) {
       result = "Format: /register name email password\n";
     }
   }
-  else if(data == '/create') {
-     var splitData = data.split(" ");
+  else if(splitData[0]  == '/create') {
+     
     if(splitData.length > 3) {
-      createRoom(splitData[1], null, user.name, splitData[3]);
+      result = createRoom(splitData[1], null, user.name, splitData[3]);
     }
     else {
-      createRoom(splitData[1], null, '', '');
+      result = createRoom(splitData[1], null, '', '');
+    }
+    if(result != '') {
+      socket.write(result);
+      getRoomNames(socket);
     }
     /*else {
       result = "Format: /register name email password\n";
     }*/
   }
-  else if(data == '/leave') {
+  else if(splitData[0]  == '/leave') {
     user.room = '';
     user.mode = 'join';
   }
@@ -122,7 +128,7 @@ function serverLog(data, room) {
 
 
 function createUser(username, email, password) {
-  var salt = crypto.randomBytes(128).toString('base64');
+  /*var salt = crypto.randomBytes(128).toString('base64');
   crypto.pbkdf2(user.password, salt, 4096, 512, 'sha256', function(err, derivedKey) {
     var pass = derivedKey;
     connection.query('Insert into users (username, email, salt, password) VALUES ('+username+','+email+','+salt+','+password+')'
@@ -130,27 +136,33 @@ function createUser(username, email, password) {
       if (err) throw err;
       serverLog("user registered: " + username + " " + email);
     });
-  });
+  });*/
 }
 
 
 function createRoom(name, port, creator, password) {
+  if(name[name.length-1] == '\n') {
+    name[name.length-1] = '';
+  }
   var newRoom = new Room(name, port, creator, password);
   rooms.push(newRoom);
   roomTable[name] = newRoom;
 
-  if(creator != '') {
+  console.log("Craeted room: " + name + ".");
+
+  return "Room was created successfully\n";
+
+  /*if(creator != '') {
     connection.query('Insert into rooms (name, port, creator, password) VALUES ('+name+','+port+','+creator+','+password+')'
     , function(err, rows, fields) {
       if (err) throw err;
       serverLog("room created: " + username + " " + email);
     });
-  }
+  }*/
 }
 
 function checkPassword(socket, data) {
   var result = "";
-
   /*
 connection.query('Select username from users where username = ' + user.username + ' and password = ' + data, function(err, rows, fields) {
   if (err) throw err;
@@ -161,26 +173,22 @@ connection.query('Select username from users where username = ' + user.username 
 });
 
   */
-
-
   return result;
 }
 
 
 function getRoomNames(socket) {
-  var maxRooms = rooms.length-1;
-  var limit = 20;
+  var maxRooms = rooms.length;
   var currentRoom = 0;
-  var message = "Active rooms are:\n";
-  while(currentRoom < limit && currentRoom < maxRooms) {
-    message += '* ' + room[currentRoom].name + ' (' + room[currentRoom].userList.length + ')\n';
+  socket.write("Active rooms are:\n");
+  while(currentRoom < maxRooms) {
+   socket.write('* ' + rooms[currentRoom].name + ' (' + rooms[currentRoom].userList.length + ')' + '\n');
     currentRoom++;
   }
-  message += "End of list\n";
-  socket.write(message);
+  socket.write("End of list\n")
 }
 
-function joinRoom(name, user) {
+function joinRoom(user, name) {
   if(name in rooms) {
     user.socket.write("entering room: " + name + '\n');
     user.room = name;
@@ -188,7 +196,7 @@ function joinRoom(name, user) {
     roomList[name].userList.push(user);
   }
   else {
-    user.socket.write("room does not exist. Type /create to make a new room\n");
+    user.socket.write("Room does not exist. Type /create to make a new room\n");
   }
 }
 
