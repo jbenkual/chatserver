@@ -1,5 +1,20 @@
-
 Telnet chat server by Joseph Benkual June 2015
+
+This server uses nodejs
+
+To access the server you can use the telnet command and pass in the ip address and port of the host server.
+
+Example: Telnet 127.0.0.1 8888
+
+You can change which port used in the config file, as well as the database info and other settings
+
+Here is a list of commands the client can use.
+quit - disconnects from server
+/register - creates a new account
+/join - enters a chatroom (by default this also creates a new room if necessary)
+/leave - exits a chatroom
+/create - creates a chatroom
+
 
 Sources used:
 http://www.davidmclifton.com/2011/07/22/simple-telnet-server-in-node-js/
