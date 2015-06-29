@@ -10,9 +10,10 @@ You can change which port used in the config file, as well as the database info 
 
 Here is a list of commands the client can use.
 /quit - disconnects from server
+/list - shows a list of existing rooms
 /join - enters an existing room
 /leave - exits a chatroom
-/create roomName password - creates a chatroom where you are the owner
+/create roomName password - creates a chatroom. If you provide a password, you become the owner
 
 ToDo:
 /register username email password - creates a new account

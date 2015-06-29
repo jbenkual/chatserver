@@ -58,6 +58,7 @@ function parseData(socket, data, user) {
       user.name = data;
       users[data] = user;
       user.mode = 'join';
+      getRoomNames(socket);
     }
   }
   else if(data == '/join') {
@@ -69,14 +70,30 @@ function parseData(socket, data, user) {
       result = "Please specify a room to join\n";
     }
   }
+  else if(data == '/list') {
+    getRoomNames(socket);
+  }
   else if(data == '/register') {
-    var roomName = data.split(" ");
-    if(roomName.length > 1) {
-      joinRoom(user, roomName[1]);
+    var splitData = data.split(" ");
+    if(splitData.length > 3) {
+      createUser(splitData[1], splitData[2], splitData[3]);
     }
     else {
       result = "Format: /register name email password\n";
     }
+  }
+  else if(data == '/create') {
+     var splitData = data.split(" ");
+    if(splitData.length > 3) {
+      createRoom(splitData[1], null, user.name, splitData[3]);
+    }
+    else {
+      createRoom(splitData[1], null, '', '');
+    }
+    /*else {
+      result = "Format: /register name email password\n";
+    }*/
+  }
   }
   else if(data == '/leave') {
     user.room = '';
@@ -152,7 +169,7 @@ connection.query('Select username from users where username = ' + user.username 
 
 
 function getRoomNames(socket) {
-  var maxRooms = rooms.length;
+  var maxRooms = rooms.length-1;
   var limit = 20;
   var currentRoom = 0;
   var message = "Active rooms are:\n";
@@ -204,7 +221,7 @@ function newSocket(socket) {
   var newUser = new User('anon', socket);
   socketTable[socket] = newUser;
   socket.write('Welcome to the GungHo test chat server\n');
-  socket.write('Currently there are ' + userList.length + ' users online\n');
+  socket.write('Currently there are ' + Object.keys(users).length + ' users online\n');
   socket.write('Login Name?\n');
   socket.on('data', function(data) {
     receiveData(socket, data, newUser);
@@ -214,6 +231,10 @@ function newSocket(socket) {
   })
 }
 
+
+/*
+ * This is a destructor method, in case we need it
+ */
 function cleanUp() {
   connection.end();
 }
