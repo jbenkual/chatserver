@@ -12,7 +12,7 @@ var Room    = require('./room.js');
   password : config.db_pass
 });*/
 
-//connection.connect();
+//connection.connect();  // Mysql stuff removed because the database can't be accessed
  
 var sockets = []; // list of unique client connections in use
 var rooms = []; // list of rooms
@@ -37,8 +37,9 @@ function receiveData(socket, data, user) {
   var cleanData = cleanInput(data);
   if(cleanData === "/quit") {
     socket.end('Goodbye!\n');
+    return;
   }
-  var result = parseData(socket, data, user);
+  var result = parseData(socket, cleanData, user);
   if(result != "") {
     socket.write(result);
   }
@@ -55,7 +56,7 @@ function parseData(socket, data, user) {
 
   if(user.mode === 'username') {
     if(data in users) {
-      result = "Sorry, that name is already in use";
+      socket.write("Sorry, that name is already in use\n");
     }
     else {
       user.name = data;
@@ -85,7 +86,6 @@ function parseData(socket, data, user) {
     }
   }
   else if(splitData[0]  == '/create') {
-     
     if(splitData.length > 3) {
       result = createRoom(splitData[1], null, user.name, splitData[3]);
     }
@@ -115,15 +115,15 @@ function parseData(socket, data, user) {
 
 
 function chatLog(data, room) {
-  fs.appendFile('log/chat/' + room + '.txt', getDateString() + data+'\n', function (err) {
+  /*fs.appendFile('log/chat/' + room + '.txt', getDateString() + data+'\n', function (err) {
     if (err) throw err;
-  });
+  });*/
 }
 
 function serverLog(data, room) {
-  fs.appendFile('log/server.txt', getDateString() + data +'\n', function (err) {
+  /*fs.appendFile('log/server.txt', getDateString() + data +'\n', function (err) {
     if (err) throw err;
-  });
+  });*/
 }
 
 
@@ -141,14 +141,11 @@ function createUser(username, email, password) {
 
 
 function createRoom(name, port, creator, password) {
-  if(name[name.length-1] == '\n') {
-    name[name.length-1] = '';
-  }
   var newRoom = new Room(name, port, creator, password);
   rooms.push(newRoom);
   roomTable[name] = newRoom;
 
-  console.log("Craeted room: " + name + ".");
+  console.log("Created room: " + name + ".");
 
   return "Room was created successfully\n";
 
@@ -189,22 +186,23 @@ function getRoomNames(socket) {
 }
 
 function joinRoom(user, name) {
-  if(name in rooms) {
+  if(name in roomTable) {
     user.socket.write("entering room: " + name + '\n');
     user.room = name;
     user.mode = 'chat';
-    roomList[name].userList.push(user);
+    roomTable[name].userList.push(user);
   }
   else {
-    user.socket.write("Room does not exist. Type /create to make a new room\n");
+    createRoom()
+    //user.socket.write("Room does not exist. Type /create to make a new room\n");
   }
 }
 
 function sendChat(user, message) {
   if (user.room != '') {
-    var theRoom = roomList[user.room];
-    for(var x = 0; x < theRoom.UserList.length; x++) {
-      theRoom.UserList[x].socket.write(user.name + ": " + message + '\n');
+    var theRoom = roomTable[user.room];
+    for(var x = 0; x < theRoom.userList.length; x++) {
+      theRoom.userList[x].socket.write(user.name + ": " + message + '\n');
       chatLog(user.room, user.name + ": " + message);
     }
   };
@@ -234,6 +232,15 @@ function newSocket(socket) {
     receiveData(socket, data, newUser);
   })
   socket.on('end', function() {
+    for(var i = 0; i < rooms.length; i++) {
+      for(var x = 0; x < rooms[i].userList.length; x++) {
+        if(rooms[i].userList[x].socket == socket) {
+          rooms[i].userList.splice(x, 1);
+        }
+      }
+    }
+    delete users[socketTable[socket]];
+    delete socketTable[socket];
     closeSocket(socket);
   })
 }

@@ -2,6 +2,8 @@ Telnet chat server by Joseph Benkual June 2015
 
 This server uses nodejs
 
+To check if this is installed, simply type "node" into the terminal. If you see > then it is installed, press ctrl-c to exit.
+
 Here is a guide on installing node (and git):
 http://iconof.com/blog/how-to-install-setup-node-js-on-amazon-aws-ec2-complete-guide/
 
@@ -12,11 +14,12 @@ cd chatserver
 
 node server
 
-To access the server you can use the telnet command and pass in the ip address and port of the host server.
+Now the server should be running on port 8888. You can change which port used in the config file, as well as the database info and other settings.
 
-Example: Telnet 127.0.0.1 8888
+To access the server you can use the telnet command in a terminal window and pass in the ip address and port of the host server.
 
-You can change which port used in the config file, as well as the database info and other settings
+Example: telnet 127.0.0.1 8888
+
 
 Here is a list of commands the client can use.
 /quit - disconnects from server
